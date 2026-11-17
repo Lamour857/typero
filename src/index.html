@@ -1,0 +1,310 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark light">
+  <meta name="theme-color" content="#111316">
+  <meta name="description" content="Typero — 一个安静、克制的本地 Markdown 阅读与写作空间。">
+  <title>Typero — Markdown Studio</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23b3653b'/%3E%3Ctext x='30' y='46' font-family='Georgia,serif' font-size='42' font-weight='700' text-anchor='middle' fill='%23fffaf6'%3ET%3C/text%3E%3Ccircle cx='49' cy='49' r='3' fill='%23fffaf6' opacity='.7'/%3E%3C/svg%3E">
+
+  <script>
+    (function () {
+      try {
+        var param = new URLSearchParams(location.search).get('theme');
+        var saved = localStorage.getItem('typero.theme');
+        var theme = param === 'light' || param === 'dark'
+          ? param
+          : (saved === 'light' || saved === 'dark'
+            ? saved
+            : (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+        document.documentElement.dataset.theme = theme;
+      } catch (error) {
+        document.documentElement.dataset.theme = 'light';
+      }
+    })();
+  </script>
+  <link rel="stylesheet" href="/assets/app.css">
+</head>
+<body>
+  <div class="app" id="app">
+    <div class="sidebar-backdrop" id="sidebarBackdrop" aria-hidden="true"></div>
+
+    <aside class="sidebar" id="sidebar" aria-label="侧边栏">
+      <div class="brand-row">
+        <div class="brand" aria-label="Typero">
+          <div class="brand-mark" aria-hidden="true">T<span></span></div>
+          <div class="brand-copy">
+            <span class="brand-name">Typero</span>
+            <span class="brand-tag">Markdown Studio</span>
+          </div>
+        </div>
+        <button class="icon-btn sidebar-collapse" id="collapseSidebar" type="button" title="收起侧边栏 (Ctrl + \)" aria-label="收起侧边栏">
+          <svg><use href="#i-chevron-left"></use></svg>
+        </button>
+      </div>
+
+      <button class="file-card" id="fileCard" type="button" title="打开一个 Markdown 文件">
+        <span class="file-badge" aria-hidden="true">MD</span>
+        <span class="file-copy">
+          <span class="file-name" id="fileName">未命名.md</span>
+          <span class="file-meta" id="fileMeta">示例文稿</span>
+        </span>
+        <svg class="file-open-icon" aria-hidden="true"><use href="#i-folder"></use></svg>
+      </button>
+
+      <div class="sidebar-tabs" role="tablist" aria-label="侧边栏面板">
+        <button class="sidebar-tab is-active" id="outlineTab" data-tab="outline" type="button" role="tab" aria-selected="true">大纲</button>
+        <button class="sidebar-tab" id="infoTab" data-tab="info" type="button" role="tab" aria-selected="false">信息</button>
+      </div>
+
+      <div class="sidebar-content">
+        <div class="sidebar-panel is-active" id="outlinePanel" role="tabpanel" aria-labelledby="outlineTab">
+          <nav class="outline" id="outline" aria-label="文档大纲"></nav>
+          <div class="outline-empty" id="outlineEmpty" hidden>
+            <svg aria-hidden="true"><use href="#i-list"></use></svg>
+            <p>暂无标题</p>
+            <span>使用 # 创建标题后，大纲会出现在这里。</span>
+          </div>
+        </div>
+
+        <div class="sidebar-panel" id="infoPanel" role="tabpanel" aria-labelledby="infoTab" hidden>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <span class="stat-value" id="statWords">0</span>
+              <span class="stat-label">字数</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-value" id="statChars">0</span>
+              <span class="stat-label">字符</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-value" id="statParagraphs">0</span>
+              <span class="stat-label">段落</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-value" id="statTime">0</span>
+              <span class="stat-label">分钟阅读</span>
+            </div>
+          </div>
+
+          <div class="info-section">
+            <h3>文稿信息</h3>
+            <dl class="info-list">
+              <div><dt>文件</dt><dd id="infoFile">未命名.md</dd></div>
+              <div><dt>格式</dt><dd>Markdown · UTF-8</dd></div>
+              <div><dt>标题</dt><dd id="infoHeadings">0 个</dd></div>
+              <div><dt>更新</dt><dd id="infoUpdated">—</dd></div>
+            </dl>
+          </div>
+
+          <div class="info-section">
+            <h3>小提示</h3>
+            <p class="info-tip">按 <kbd>Ctrl</kbd> + <kbd>\</kbd> 收起侧栏，按 <kbd>F8</kbd> 进入专注阅读。</p>
+            <p class="info-tip">在分栏模式下，左右两栏的滚动位置会保持同步。</p>
+            <p class="info-tip">运行 <code>install-typero-association.cmd</code> 后，双击 <code>.md</code> 文件即可直接用 Typero 打开。</p>
+            <p class="info-tip">Typero 使用仅监听本机的后台服务；运行 <code>stop-typero.cmd</code> 可完全停止它。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="local-note">
+          <svg aria-hidden="true"><use href="#i-lock"></use></svg>
+          <span>仅在本机打开，不会上传</span>
+        </div>
+        <div class="save-indicator" id="saveIndicator">
+          <span class="status-dot"></span>
+          <span id="saveStatus">示例文稿</span>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="icon-btn sidebar-open" id="openSidebar" type="button" title="展开侧边栏 (Ctrl + \)" aria-label="展开侧边栏">
+            <svg><use href="#i-menu"></use></svg>
+          </button>
+          <div class="doc-heading">
+            <span class="doc-title" id="docTitle">未命名.md</span>
+            <span class="doc-subtitle" id="docSubtitle">本地 Markdown 文稿</span>
+          </div>
+        </div>
+
+        <div class="mode-switch" role="group" aria-label="视图模式">
+          <button class="mode-btn" data-mode="read" type="button" title="阅读模式 (Alt + 1)" aria-label="阅读模式">
+            <svg aria-hidden="true"><use href="#i-eye"></use></svg><span>阅读</span>
+          </button>
+          <button class="mode-btn is-active" data-mode="split" type="button" title="分栏模式 (Alt + 2)" aria-label="分栏模式">
+            <svg aria-hidden="true"><use href="#i-columns"></use></svg><span>分栏</span>
+          </button>
+          <button class="mode-btn" data-mode="source" type="button" title="源码模式 (Alt + 3)" aria-label="源码模式">
+            <svg aria-hidden="true"><use href="#i-code"></use></svg><span>源码</span>
+          </button>
+        </div>
+
+        <div class="topbar-actions">
+          <button class="action-btn open-btn" id="openBtn" type="button" title="打开文件 (Ctrl + O)" aria-label="打开文件">
+            <svg aria-hidden="true"><use href="#i-folder"></use></svg><span>打开</span>
+          </button>
+          <button class="action-btn save-btn" id="saveBtn" type="button" title="保存 (Ctrl + S)" aria-label="保存">
+            <svg aria-hidden="true"><use href="#i-save"></use></svg><span>保存</span>
+          </button>
+          <button class="icon-btn theme-toggle" id="themeToggle" type="button" title="切换明暗主题" aria-label="切换明暗主题">
+            <svg class="icon-sun" aria-hidden="true"><use href="#i-sun"></use></svg>
+            <svg class="icon-moon" aria-hidden="true"><use href="#i-moon"></use></svg>
+          </button>
+          <div class="menu-wrap">
+            <button class="icon-btn" id="moreBtn" type="button" title="更多操作" aria-label="更多操作" aria-expanded="false" aria-haspopup="menu">
+              <svg aria-hidden="true"><use href="#i-more"></use></svg>
+            </button>
+            <div class="menu" id="moreMenu" role="menu" hidden>
+              <button class="menu-item" data-action="new" role="menuitem" type="button">
+                <svg aria-hidden="true"><use href="#i-plus"></use></svg><span>新建文稿</span><kbd>Ctrl N</kbd>
+              </button>
+              <button class="menu-item" data-action="save-as" role="menuitem" type="button">
+                <svg aria-hidden="true"><use href="#i-save"></use></svg><span>另存为…</span><kbd>Ctrl ⇧ S</kbd>
+              </button>
+              <div class="menu-separator" role="separator"></div>
+              <button class="menu-item" data-action="export" role="menuitem" type="button">
+                <svg aria-hidden="true"><use href="#i-download"></use></svg><span>导出 HTML</span><kbd></kbd>
+              </button>
+              <button class="menu-item" data-action="print" role="menuitem" type="button">
+                <svg aria-hidden="true"><use href="#i-printer"></use></svg><span>打印 / PDF</span><kbd></kbd>
+              </button>
+              <div class="menu-separator" role="separator"></div>
+              <button class="menu-item" data-action="focus" role="menuitem" type="button">
+                <svg aria-hidden="true"><use href="#i-focus"></use></svg><span>专注阅读</span><kbd>F8</kbd>
+              </button>
+              <button class="menu-item" data-action="shortcuts" role="menuitem" type="button">
+                <svg aria-hidden="true"><use href="#i-keyboard"></use></svg><span>快捷键</span><kbd>?</kbd>
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div class="progress-track" aria-hidden="true"><span id="readingProgress"></span></div>
+
+      <div class="workspace" id="workspace" data-mode="split">
+        <section class="source-pane" id="sourcePane" aria-label="Markdown 源码">
+          <div class="pane-label-row">
+            <span class="pane-label">MARKDOWN</span>
+            <span class="pane-hint">Markdown 语法 · Ctrl+B 加粗</span>
+          </div>
+          <div class="editor-scroll">
+            <textarea id="editor" spellcheck="false" autocomplete="off" autocapitalize="off" wrap="soft" aria-label="Markdown 编辑器" placeholder="在这里开始书写 Markdown…"></textarea>
+          </div>
+          <div class="pane-status">
+            <span id="cursorPos">第 1 行，第 1 列</span>
+            <span id="sourceStats">0 字</span>
+          </div>
+        </section>
+
+        <div class="pane-divider" id="divider" role="separator" aria-orientation="vertical" aria-label="调整分栏宽度" title="拖动调整宽度，双击复位"><span></span></div>
+
+        <section class="preview-pane" id="previewPane" aria-label="渲染预览">
+          <div class="preview-scroll" id="previewScroll">
+            <article class="markdown-body" id="preview"></article>
+            <div class="preview-empty" id="previewEmpty" hidden>
+              <div class="empty-glyph">¶</div>
+              <p>空白文稿</p>
+              <span>在编辑区写下第一句话，预览会在这里展开。</span>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="drop-overlay" id="dropOverlay" aria-hidden="true">
+        <div class="drop-card">
+          <svg aria-hidden="true"><use href="#i-file"></use></svg>
+          <strong>松开以打开 Markdown 文件</strong>
+          <span>支持 .md · .markdown · .mdown · .txt</span>
+        </div>
+      </div>
+    </main>
+
+    <button class="focus-exit" id="focusExit" type="button" title="退出专注阅读 (Esc)">
+      <svg aria-hidden="true"><use href="#i-minimize"></use></svg><span>退出专注</span><kbd>Esc</kbd>
+    </button>
+    <div class="reading-pill" id="readingPill" aria-hidden="true"><span id="readingPct">0%</span> 已读</div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <dialog class="modal" id="shortcutsDialog">
+    <div class="modal-head">
+      <div>
+        <h2>键盘快捷键</h2>
+        <p>让双手留在键盘上。</p>
+      </div>
+      <button class="icon-btn" id="closeShortcuts" type="button" aria-label="关闭">
+        <svg aria-hidden="true"><use href="#i-x"></use></svg>
+      </button>
+    </div>
+    <div class="shortcut-grid">
+      <div class="shortcut-group">
+        <h3>文件</h3>
+        <div class="shortcut-row"><span>打开文件</span><kbd>Ctrl</kbd><kbd>O</kbd></div>
+        <div class="shortcut-row"><span>保存</span><kbd>Ctrl</kbd><kbd>S</kbd></div>
+        <div class="shortcut-row"><span>另存为</span><kbd>Ctrl</kbd><kbd>⇧</kbd><kbd>S</kbd></div>
+        <div class="shortcut-row"><span>新建文稿</span><kbd>Ctrl</kbd><kbd>N</kbd></div>
+      </div>
+      <div class="shortcut-group">
+        <h3>视图</h3>
+        <div class="shortcut-row"><span>阅读模式</span><kbd>Alt</kbd><kbd>1</kbd></div>
+        <div class="shortcut-row"><span>分栏模式</span><kbd>Alt</kbd><kbd>2</kbd></div>
+        <div class="shortcut-row"><span>源码模式</span><kbd>Alt</kbd><kbd>3</kbd></div>
+        <div class="shortcut-row"><span>专注阅读</span><kbd>F8</kbd></div>
+      </div>
+      <div class="shortcut-group">
+        <h3>编辑</h3>
+        <div class="shortcut-row"><span>加粗</span><kbd>Ctrl</kbd><kbd>B</kbd></div>
+        <div class="shortcut-row"><span>斜体</span><kbd>Ctrl</kbd><kbd>I</kbd></div>
+        <div class="shortcut-row"><span>行内代码</span><kbd>Ctrl</kbd><kbd>`</kbd></div>
+        <div class="shortcut-row"><span>插入链接</span><kbd>Ctrl</kbd><kbd>K</kbd></div>
+      </div>
+      <div class="shortcut-group">
+        <h3>界面</h3>
+        <div class="shortcut-row"><span>收起 / 展开侧栏</span><kbd>Ctrl</kbd><kbd>\</kbd></div>
+        <div class="shortcut-row"><span>关闭菜单 / 退出专注</span><kbd>Esc</kbd></div>
+        <div class="shortcut-row"><span>关闭快捷键</span><kbd>Esc</kbd></div>
+      </div>
+    </div>
+    <p class="modal-note">所有文稿都只在本机浏览器中处理。Typero 不会发送或上传任何内容。</p>
+  </dialog>
+
+  <input type="file" id="fileInput" accept=".md,.markdown,.mdown,.mkd,.txt,text/markdown,text/plain" hidden>
+
+  <svg class="svg-sprite" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></symbol>
+    <symbol id="i-chevron-left" viewBox="0 0 24 24"><path d="m14.5 6-6 6 6 6"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+    <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3.5 7.5A2.5 2.5 0 0 1 6 5h3l2 2h7a2.5 2.5 0 0 1 2.5 2.5v7A2.5 2.5 0 0 1 18 19H6a2.5 2.5 0 0 1-2.5-2.5v-9Z"/></symbol>
+    <symbol id="i-save" viewBox="0 0 24 24"><path d="M5 4h11l3 3v12a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z"/><path d="M8 4v5h7V4M8 20v-6h8v6"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.5"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.28 5.28l1.42 1.42M17.3 17.3l1.42 1.42M18.72 5.28 17.3 6.7M6.7 17.3l-1.42 1.42"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20.4 14.3A8.5 8.5 0 0 1 9.7 3.6a8.5 8.5 0 1 0 10.7 10.7Z"/></symbol>
+    <symbol id="i-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.2" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.8 12S6.2 5.8 12 5.8 21.2 12 21.2 12 17.8 18.2 12 18.2 2.8 12 2.8 12Z"/><circle cx="12" cy="12" r="2.7"/></symbol>
+    <symbol id="i-columns" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M12 4.5v15"/></symbol>
+    <symbol id="i-code" viewBox="0 0 24 24"><path d="m8.5 8-4 4 4 4M15.5 8l4 4-4 4M13.5 5l-3 14"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12M7.5 10.5 12 15l4.5-4.5M4 20h16"/></symbol>
+    <symbol id="i-printer" viewBox="0 0 24 24"><path d="M7 8V4h10v4M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/><rect x="7" y="14" width="10" height="6" rx="1"/></symbol>
+    <symbol id="i-focus" viewBox="0 0 24 24"><path d="M8 3H4.5A1.5 1.5 0 0 0 3 4.5V8M16 3h3.5A1.5 1.5 0 0 1 21 4.5V8M21 16v3.5a1.5 1.5 0 0 1-1.5 1.5H16M8 21H4.5A1.5 1.5 0 0 1 3 19.5V16"/></symbol>
+    <symbol id="i-minimize" viewBox="0 0 24 24"><path d="M9 3v4.5A1.5 1.5 0 0 1 7.5 9H3M15 3v4.5A1.5 1.5 0 0 0 16.5 9H21M21 15h-4.5a1.5 1.5 0 0 0-1.5 1.5V21M3 15h4.5A1.5 1.5 0 0 1 9 16.5V21"/></symbol>
+    <symbol id="i-keyboard" viewBox="0 0 24 24"><rect x="2.5" y="6" width="19" height="12" rx="2"/><path d="M6 10h.01M9.5 10h.01M13 10h.01M16.5 10h.01M6 13.5h.01M9.5 13.5h.01M13 13.5h.01M16.5 13.5h.01M8 17h8"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 6.5"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6V3Z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></symbol>
+    <symbol id="i-external" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></symbol>
+    <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="m5 17 4.5-4.5L13 16l2.5-2.5L21 19"/></symbol>
+  </svg>
+
+  <script type="module" src="/assets/app.js"></script>
+</body>
+</html>

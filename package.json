@@ -1,0 +1,28 @@
+{
+  "name": "typero",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Typero — a calm, local-first Markdown reader and editor with light and dark themes.",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "start": "node scripts/launch.mjs",
+    "stop": "node scripts/launch.mjs --stop",
+    "dev": "node scripts/build.mjs --dev && node server.mjs --no-open --port 4180 --runtime .typero-dev",
+    "test": "npm run build && node scripts/smoke-test.mjs && node scripts/association-test.mjs",
+    "test:association": "npm run build && node scripts/association-test.mjs",
+    "association:install": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/install-association.ps1",
+    "association:uninstall": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/install-association.ps1 -Uninstall"
+  },
+  "dependencies": {
+    "dompurify": "^3.4.18",
+    "highlight.js": "^11.12.0",
+    "katex": "^0.16.47",
+    "marked": "^18.2.1",
+    "marked-katex-extension": "^5.1.13"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2",
+    "playwright-core": "^1.65.1"
+  }
+}
